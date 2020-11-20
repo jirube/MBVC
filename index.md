@@ -1,37 +1,41 @@
 ## Welcome to GitHub Pages
+## Jimmy Rugel Bejarano
 
-You can use the [editor on GitHub](https://github.com/jirube/MBVC/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+import tensorflow.keras
+from PIL import Image, ImageOps
+import numpy as np
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# Disable scientific notation for clarity
+np.set_printoptions(suppress=True)
 
-### Markdown
+# Load the model
+model = tensorflow.keras.models.load_model('keras_model.h5')
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+# Create the array of the right shape to feed into the keras model
+# The 'length' or number of images you can put into the array is
+# determined by the first position in the shape tuple, in this case 1.
+data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
 
-```markdown
-Syntax highlighted code block
+# Replace this with the path to your image
+image = Image.open('test_photo.jpg')
 
-# Header 1
-## Header 2
-### Header 3
+#resize the image to a 224x224 with the same strategy as in TM2:
+#resizing the image to be at least 224x224 and then cropping from the center
+size = (224, 224)
+image = ImageOps.fit(image, size, Image.ANTIALIAS)
 
-- Bulleted
-- List
+#turn the image into a numpy array
+image_array = np.asarray(image)
 
-1. Numbered
-2. List
+# display the resized image
+image.show()
 
-**Bold** and _Italic_ and `Code` text
+# Normalize the image
+normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
 
-[Link](url) and ![Image](src)
-```
+# Load the image into the array
+data[0] = normalized_image_array
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/jirube/MBVC/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+# run the inference
+prediction = model.predict(data)
+print(prediction)
